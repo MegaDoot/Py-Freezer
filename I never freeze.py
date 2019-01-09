@@ -14,8 +14,11 @@ if importlib.find_loader("tkinter.filedialog") is None:
 from tkinter import filedialog as tkfd
 import tkinter as tk
 
-os.system("pip install Cx_freeze")
-print("Installed Cx_freeze")
+if importlib.find_loader("cx_Freeze") is None:
+    os.system("pip install Cx_freeze & python -m pip install cx_Freeze --upgrade")
+    print("Installed cx_freeze")
+
+import cx_Freeze
 
 font = "Consolas"
 
@@ -26,7 +29,7 @@ class App(tk.Tk):
         self.dir_entry = tk.Entry(self, font = (font, 20))
 
     def set_filename(self):
-        self.file_name = tkfd.askopenfilename(initialdir = "S:\\", filetypes = (("python files", "*.py"), ("all files", "*.*")))
+        self.file_name = tkfd.askopenfilename(initialdir = r"C:\Users\alexs\Desktop\Non-Game Applications\Coding\Git\Py-Freezer", filetypes = (("python files", "*.py"), ("all files", "*.*")))
 
 if __name__ == "__main__":
     App()
