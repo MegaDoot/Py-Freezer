@@ -7,9 +7,13 @@ This program is intended to be run on the command line with one argument
 
 
 from cx_Freeze import setup, Executable
-from sys import argv
+import os
 
-setup(name = os.path.splitext(argv[0])[0] ,
+os.environ["TCL_LIBRARY"] = os.environ["TK_LIBRARY"] = r"C:\Users\alexs\Desktop\Non-Game Applications\Coding\Cmder\vendor\git-for-windows\mingw64\lib\tcl8.6"
+
+filename = open("Filename.txt")
+
+setup(name = "Test",
       version = "0.1" ,
       description = "" ,
-      executables = [Executable(argv[0])])
+      executables = [Executable("Test.py")])
