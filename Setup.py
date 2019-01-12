@@ -10,7 +10,7 @@ import re
 
 os.environ["TCL_LIBRARY"] = os.environ["TK_LIBRARY"] = r"C:\Users\alexs\Desktop\Non-Game Applications\Coding\Cmder\vendor\git-for-windows\mingw64\lib\tcl8.6"
 
-filename = open("Filename.txt").read()
+filename = open(os.path.dirname(__file__) + "\Filename.txt").read()
 name = re.compile(r"[A-Za-z]+\.py(w?)$").search(filename).group() #Get name of file only
 
 setup(name = os.path.splitext(filename)[0],
