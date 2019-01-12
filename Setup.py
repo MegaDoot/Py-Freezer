@@ -4,7 +4,7 @@ https://pythonprogramming.net/converting-python-scripts-exe-executables/
 """
 
 
-from cx_Freeze import setup, Executable
+from cx_Freeze import setup, Executable #Setup in 'I never freeze.py'
 import os
 import re
 
