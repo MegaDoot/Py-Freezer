@@ -7,19 +7,21 @@ github repo = https://github.com/MegaDoot/Py-Freezer
 
 import os
 import importlib
+import pip
 
 
 def install_lib(name_pip, name_imp):
     if importlib.find_loader(name_imp) is None:
         os.system(name_pip)
+        print("Installing " + name_imp)
     exec("import " + name_imp)
-    print("Installed " + name_imp)
 
-os.chdir("C:\\Program Files\\Python36")
-os.system("python -m pip install --upgrade pip")
+##os.chdir("C:\\Program Files\\Python36")
+if float(pip.__version__) < 18.1:
+    os.system("python -m pip install --upgrade pip")
 
 install_lib("pip install tkfilebrowser", "tkinter.filedialog")
-install_lib("python -m pip install Cx_freeze & Pause", "cx_Freeze")
+install_lib("pip install Cx_freeze & Pause", "cx_Freeze")
 
 from tkinter import filedialog as tkfd
 import tkinter as tk
@@ -30,7 +32,8 @@ cwd = os.path.dirname(__file__)
 font = "HP Simplified"
 bg = "#f4c542"
 fg = "#000000"
-no_selection = "(None)"
+no_selection = "(None Selected)"
+invalid_dir = "(Invalid Input Directory)" ##"ThIs iS DeFiNiTeLy a vAlId dIrEcToRy"
 
 style = {
     "fg":fg,
@@ -74,13 +77,16 @@ class App(tk.Tk):
             self.entries[i].grid(row = row, column = 1, sticky = "NS")
             tk.Button(self, text = "Browse", **btn_style, **style, command = lambda i = i: self.set_filename(i)).grid(row = row, column = 2, sticky = "NS", padx = 5)
             tk.Label(self, text = ("Input:", "Output:")[i], font = (font, 15), bg = bg, **style).grid(row = row, column = 0, padx = 5, sticky = "E")
-            self.sv_inputs[i].trace("w", self.dir_trace)
+            self.sv_inputs[i].trace("w", lambda n, m,x: self.dir_trace())
         tk.Label(self, text = "Select A py/pyw File In Input Directory:", font = (font, 15), bg = bg, **style).grid(row = 4, column = 1)
 
         self.sv_file = tk.StringVar(self, value = no_selection)
         
-##        self.in_dir_cb = ttk.Combobox(self, textvariable = self.sv_file, style = "BW.TLabel", width = 50, font = (font, 15))
-##        self.in_dir_cb.grid(row = 5, column = 1)
+        self.in_dir_cb = ttk.Combobox(self, textvariable = self.sv_file, style = "BW.TLabel", width = 20, font = (font, 15), state = "readonly")
+        self.in_dir_cb.grid(row = 5, column = 1)
+
+        self.build_btn = tk.Button(text = "Freeze/Build", **style, **btn_style, command = self.build)
+        self.build_btn.grid(row = 6, column = 1, pady = 5)
         
         self.sv_constrain_io.trace("w", self.constraint_trace)
 ##
@@ -88,7 +94,10 @@ class App(tk.Tk):
 ##        self.stack_positions = [0] * 2
 
         self.bind("<Button-1>", self.flatten)
+        self.bind("<<ComboboxSelected>>", lambda event: self.in_dir_cb.selection_clear())
 ##        self.bind("<Control-Z>", self.undo)
+        self.constraint_trace()
+        self.dir_trace()
 
 ##    def new_change(self, which):
 ##        print(self.stacks)
@@ -101,6 +110,13 @@ class App(tk.Tk):
 ##            self.stack_positions[which] -= 1
 ##        self.set_entry(which, self.stacks[which])
 
+    def build(self):
+        os.chdir(cwd)
+        with open("Filename.txt", "w") as file:
+            file.write(os.path.realpath(self.sv_file.get()))
+        os.chdir(self.sv_inputs[not self.sv_constrain_io.get()]) #Navigate to output directory
+        os.system('python "{}\\Setup.py" build'.format(cwd)) #Regardless of current directory
+
     def flatten(self, event):
         """By default, buttons become sunken when clicked. This is called whenever a
         button is clicked, setting it to a solid relief, only changing its background
@@ -111,7 +127,14 @@ class App(tk.Tk):
                     widget.config(relief = btn_style["relief"])
 
     def dir_trace(self, *args):
-        pass
+        """Called whenever entries updated"""
+        self.sv_inputs[0].set(self.sv_inputs[0].get())
+        if os.path.isdir(self.sv_inputs[0].get()):
+            os.chdir(self.sv_inputs[0].get())
+            self.in_dir_cb.config(values = [file for file in os.listdir() if os.path.splitext(file)[1] in (".py", ".pyw")])
+            self.sv_file.set(no_selection)
+        else:
+            self.sv_file.set(invalid_dir)
 
     def constraint_trace(self, *args):
         """When checkbutton changed, the second textbox will either share a textvariable
