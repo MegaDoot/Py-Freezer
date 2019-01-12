@@ -114,8 +114,8 @@ class App(tk.Tk):
         os.chdir(cwd)
         with open("Filename.txt", "w") as file:
             file.write(os.path.realpath(self.sv_file.get()))
-        os.chdir(self.sv_inputs[not self.sv_constrain_io.get()]) #Navigate to output directory
-        os.system('python "{}\\Setup.py" build'.format(cwd)) #Regardless of current directory
+        os.chdir(self.sv_inputs[not self.sv_constrain_io.get()].get()) #Navigate to output directory
+##        os.system('python "{}\\Setup.py" build'.format(cwd)) #Regardless of current directory
 
     def flatten(self, event):
         """By default, buttons become sunken when clicked. This is called whenever a
