@@ -20,10 +20,11 @@ def install_lib(name_pip, name_imp):
     exec("import " + name_imp)
 
 if float(pip.__version__) < 18.1:
+    print("Installing pip 18.1")
     os.system("python -m pip install --upgrade pip")
 
-install_lib("pip install tkfilebrowser", "tkinter.filedialog")
-install_lib("pip install Cx_freeze & Pause", "cx_Freeze")
+install_lib("pip install tkfilebrowser & Pause>nul", "tkinter.filedialog")
+install_lib("pip install Cx_freeze", "cx_Freeze")
 
 from tkinter import filedialog as tkfd
 import tkinter as tk
@@ -98,7 +99,8 @@ class App(tk.Tk):
     def build(self):
         os.chdir(cwd)
         with open("Filename.txt", "w") as file:
-            file.write(os.path.realpath(self.sv_file.get()))
+            input_dir = self.sv_inputs[0].get()
+            file.write(input_dir + ("\\" if input_dir[-1] != "\\" else "") + self.sv_file.get())
         os.chdir(self.sv_inputs[not self.sv_constrain_io.get()].get()) #Navigate to output directory
         os.system('python "{}/Setup.py" build & Pause'.format(cwd)) #Regardless of current directory
 
