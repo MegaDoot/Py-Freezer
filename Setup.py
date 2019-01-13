@@ -13,7 +13,7 @@ import os
 import re
 import sys
 
-dir_ = repr(open(os.path.dirname(__file__) + "\Dir.txt").read())
+dir_ = open(os.path.dirname(__file__) + "\Dir.txt").read()
 os.environ["TCL_LIBRARY"] = dir_ + r"\tcl\tcl8.6"
 os.environ["TK_LIBRARY"] = dir_ + r"\tcl\tk8.6"
 
@@ -31,7 +31,7 @@ setup(name = os.path.splitext(filename)[0],
       options = {"build_exe":{"packages":["os"],
                               "includes":["tkinter"],
                               "include_files": [dir_ + r"\DLLs\tcl86t.dll",
-                                                dir_ + r"DLLs\tk86t.dll"]
+                                                dir_ + r"\DLLs\tk86t.dll"]
                               }
                  }
       )

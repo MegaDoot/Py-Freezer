@@ -91,7 +91,7 @@ class App(tk.Tk):
         self.build_btn.grid(row = 6, column = 1, pady = 5)
         
         self.bind("<Button-1>", self.flatten)
-        self.bind("<<ComboboxSelected>>", lambda event: [self.in_dir_cb.selection_clear(), self.build_btn.config(state = "normal")])
+        self.bind("<<ComboboxSelected>>", lambda event: [self.in_dir_cb.selection_clear(), self.build_btn.config(state = ("normal" if self.valid_output() else "disabled"))])
 
         self.constraint_trace()
         self.dir_trace()
@@ -103,6 +103,11 @@ class App(tk.Tk):
             file.write(input_dir + ("\\" if input_dir[-1] != "\\" else "") + self.sv_file.get())
         os.chdir(self.sv_inputs[not self.sv_constrain_io.get()].get()) #Navigate to output directory
         os.system('python "{}/Setup.py" build & Pause'.format(cwd)) #Regardless of current directory
+
+    def valid_output(self):
+        if os.path.exists(self.sv_inputs[not self.sv_constrain_io.get()].get()):
+            return True
+        return False
 
     def flatten(self, event):
         """By default, buttons become sunken when clicked. This is called whenever a
@@ -149,4 +154,8 @@ class App(tk.Tk):
         self.sv_inputs[to_set].set(value)
 
 if __name__ == "__main__":
+    if not "Dir.txt" in os.listdir():
+        with open("Dir.txt", "w") as file:
+            file.write(tk.__file__[:-24]) #Path of Python
+            
     app = App()
