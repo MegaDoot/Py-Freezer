@@ -1,0 +1,6 @@
+{
+    "packages":["os"],
+    "includes":["tkinter"],
+    "include_files": ["DLLs\\tcl86t.dll",
+                      "DLLs\\tk86t.dll"]
+}
