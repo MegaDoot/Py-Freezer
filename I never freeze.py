@@ -1,4 +1,7 @@
 r"""
+DON'T USE PYTHON 3.7 OR ABOVE (although this error is caught)
+Cx_freeze is not updated for Python 3.7.x
+
 Made by Alex Scorza
 pip and python are needed. Either set them as path variables, the setx command
 or navigate to where python.exe and pip.exe are installed and run this program
@@ -8,23 +11,43 @@ Cx_freeze and tkfilebrowser are automatically installed, as it pip 18.2
 github repo = https://github.com/MegaDoot/Py-Freezer
 """
 
-import os
-import importlib
-import pip
+import os, importlib, pip, re, sys
 
+py_dir = os.__file__[:-10]
+if not "Dir.txt" in os.listdir():
+    with open("Dir.txt", "w") as file:
+        file.write(py_dir) #Path of Python
+        print("Directory Added: " + py_dir)
+#(Note that any library (not just os) can be used)
+
+os.chdir(py_dir + r"\Scripts")
+
+def find_version(string):
+    return re.compile("^\d+\.\d+").search(string).group()
 
 def install_lib(name_pip, name_imp):
-    if importlib.find_loader(name_imp) is None:
-        os.system(name_pip)
+##    if importlib.util.find_spec(name_imp) is None: #If not found
+##        print("Installing " + name_imp)
+##        os.system(name_pip)
+##    else:
+##        print(name_imp + " Is Already Installed")
+##        exec("import " + name_imp)
+    try:
+        exec("import " + name_imp)
+        print(name_imp + " Is Already Installed")
+    except:
         print("Installing " + name_imp)
-    exec("import " + name_imp)
+        os.system(name_pip)
+        exec("import " + name_imp)
 
-if float(pip.__version__) < 18.1:
+if float(find_version(pip.__version__)) < 18.1:
     print("Installing pip 18.1")
     os.system("python -m pip install --upgrade pip")
 
-install_lib("pip install tkfilebrowser & Pause>nul", "tkinter.filedialog")
+install_lib("pip install tkfilebrowser", "tkinter.filedialog")
 install_lib("pip install Cx_freeze", "cx_Freeze")
+
+del pip, importlib
 
 from tkinter import filedialog as tkfd
 import tkinter as tk
@@ -95,6 +118,8 @@ class App(tk.Tk):
 
         self.constraint_trace()
         self.dir_trace()
+
+        self.mainloop()
         
     def build(self):
         os.chdir(cwd)
@@ -102,7 +127,7 @@ class App(tk.Tk):
             input_dir = self.sv_inputs[0].get()
             file.write(input_dir + ("\\" if input_dir[-1] != "\\" else "") + self.sv_file.get())
         os.chdir(self.sv_inputs[not self.sv_constrain_io.get()].get()) #Navigate to output directory
-        os.system('python "{}/Setup.py" build & Pause'.format(cwd)) #Regardless of current directory
+        os.system('python "{}/Setup.py" build'.format(cwd)) #Regardless of current directory
 
     def valid_output(self):
         if os.path.exists(self.sv_inputs[not self.sv_constrain_io.get()].get()):
@@ -153,9 +178,46 @@ class App(tk.Tk):
             to_set = 0
         self.sv_inputs[to_set].set(value)
 
+class VersionError(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Version Error")
+        self.configure(bg = bg)
+
+        import webbrowser
+        
+        tk.Message(**style, font = (font, 20),justify = "center", width = 500, bg = bg,
+                   text = """It appears that you are using Python 3.7.
+Cx_freeze (imported as cx_Freeze) is not updated for 3.7.x (13/01/19).
+Please revert to 3.6 or lower or use the fix in the link below:"""
+                   ).grid(row = 0, column = 0, columnspan = 2)
+        url_text = tk.Text(self, font = (font, 15), state = "normal", height = 1, width = 45)
+        url_text.tag_configure("center", justify = "center")
+        url_text.insert("1.0", url)
+        url_text.tag_add("center", "1.0", "end")
+        url_text.config(state = "disabled")
+        url_text.grid(row = 1, column = 0, columnspan = 2)
+        commands = (self.copy, lambda: webbrowser.open(url))
+        for i in range(2):
+            tk.Button(**style, **btn_style, text = ("Copy To Clipboard", "Open In Browser")[i], command = commands[i]).grid(row = 2, column = i, pady = 5, padx = 5, sticky = "EW")
+
+        self.bind("<Button-1>", self.flatten)
+        self.mainloop()
+
+    def copy(self):
+        """Add the url to the clipboard"""
+        self.clipboard_clear()
+        self.clipboard_append(url)
+
+    def flatten(self, event):
+        """Same as flatten method for App class"""
+        App.flatten(self, event)
+
 if __name__ == "__main__":
-    if not "Dir.txt" in os.listdir():
-        with open("Dir.txt", "w") as file:
-            file.write(tk.__file__[:-24]) #Path of Python
-            
-    app = App()
+    version = sys.version_info
+    del sys
+    if  version >= (3,7,0):
+        url = r"https://github.com/anthony-tuininga/cx_Freeze/issues/407"
+        app = VersionError()
+    else:
+        app = App()
